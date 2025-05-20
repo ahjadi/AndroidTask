@@ -28,10 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.androidtask.ui.theme.AndroidTaskTheme
-import org.jetbrains.annotations.NotNull
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,13 +42,9 @@ class MainActivity : ComponentActivity() {
             Question("T/F: Kotlin is officially supported for Android development", true)
 
         )
-
-
         setContent {
             var answer by rememberSaveable { mutableStateOf<Boolean?>(null) }
             var questionIdx by rememberSaveable { mutableStateOf(0) }
-
-
             AndroidTaskTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Column(
@@ -60,18 +54,25 @@ class MainActivity : ComponentActivity() {
                         verticalArrangement = Arrangement.SpaceBetween,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-
                         if (questionIdx < questions.size) {
                             QuestionPrint(text = questions[questionIdx].question)
 
                             if(answer != null){
                                 var isCorrect = (answer == questions[questionIdx].answer)
                                 AnswerCircle(isCorrect)
-                                Button(onClick = {
-                                    questionIdx++
-                                    answer = null
-                                         }) {
-                                    Text("Next Question")
+                                if (isCorrect){
+                                    Button(onClick = {
+                                        questionIdx++
+                                        answer = null
+                                    }) {
+                                        Text("Next Question")
+                                    }
+                                } else{
+                                    Button(onClick = {
+                                        answer = null
+                                    }) {
+                                        Text("Try again")
+                                    }
                                 }
                             } else
                                 Row {
@@ -89,8 +90,6 @@ class MainActivity : ComponentActivity() {
                         else{
                             Text("Quiz done")
                         }
-
-
                     }
                 }
             }
@@ -111,16 +110,19 @@ data class Question(
 )
 @Composable
 fun AnswerCircle(answer: Boolean) {
-    val color = if (answer == false) Color.Red else Color.Green
+    val color = if (!answer) Color.Red else Color.Green
+    val text =  if (!answer) "Wrong answer!" else "Correct answer!"
     Box(
+        contentAlignment = Alignment.Center,
         modifier = Modifier
             .clip(CircleShape)
             .size(200.dp)
             .background(color)
-    )
-}
-
-
-@Composable fun test(){
-
+    ) {
+        Text(
+            text = text,
+            color = Color.Black,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
 }
